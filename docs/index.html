@@ -59,27 +59,49 @@
 
     .dock {
       position: fixed;
-      bottom: 20px;
+      bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255,255,255,0.2);
       backdrop-filter: blur(10px);
-      padding: 10px 20px;
-      border-radius: 20px;
+      padding: 8px 16px;
+      border-radius: 12px 12px 0 0;
       display: flex;
-      gap: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      gap: 16px;
+      box-shadow: 0 -2px 15px rgba(0,0,0,0.3);
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .dock-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .dock-icon {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       transition: transform 0.2s;
       cursor: pointer;
     }
 
     .dock-icon:hover {
-      transform: scale(1.2);
+      transform: scale(1.15);
+    }
+
+    .indicator {
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      margin-top: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .dock-item[data-active="true"] .indicator {
+      opacity: 1;
     }
   </style>
 </head>
@@ -95,13 +117,19 @@
     </div>
     <div class="content">
       <h2>나만의 Mac 창 🪟</h2>
-      <p>지금 배경은 네가 넣은 <code>background.jpg</code>야. 감성은 네 손에 달렸다!</p>
+      <p>이 창이 떠 있으면 Finder도 활성화! 하얀 점 콕~</p>
     </div>
   </div>
 
   <div class="dock">
-    <img src="https://upload.wikimedia.org/wikipedia/en/5/51/Finder_Icon_macOS.png" alt="Finder" class="dock-icon">
-    <img src="https://upload.wikimedia.org/wikipedia/en/3/3d/Safari_Icon_macOS_Big_Sur.png" alt="Safari" class="dock-icon">
+    <div class="dock-item" data-active="true">
+      <img src="https://upload.wikimedia.org/wikipedia/en/5/51/Finder_Icon_macOS.png" alt="Finder" class="dock-icon">
+      <div class="indicator"></div>
+    </div>
+    <div class="dock-item" data-active="false">
+      <img src="https://upload.wikimedia.org/wikipedia/en/3/3d/Safari_Icon_macOS_Big_Sur.png" alt="Safari" class="dock-icon">
+      <div class="indicator"></div>
+    </div>
   </div>
 
   <script>
@@ -129,5 +157,6 @@
       isDragging = false;
     });
   </script>
+
 </body>
 </html>
