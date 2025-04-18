@@ -1,190 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>El Capitan Retro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>내 첫 번째 웹페이지</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: url('icon/background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .window {
-      width: 600px;
-      height: 400px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      overflow: hidden;
-      position: absolute;
-      top: 100px;
-      left: 100px;
-    }
-
-    .title-bar {
-      height: 32px;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      cursor: move;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-
-    .close { background: #ff5f57; }
-    .minimize { background: #ffbd2e; }
-    .maximize { background: #28c840; }
-
-    .content {
-      padding: 20px;
-      color: white;
-    }
-
-    .dock {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
-      padding: 8px 16px;
-      border-radius: 12px 12px 0 0;
-      display: flex;
-      gap: 16px;
-      box-shadow: 0 -2px 15px rgba(0,0,0,0.3);
-      border-top: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .dock-item {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .dock-icon {
-      width: 44px;
-      height: 44px;
-      transition: transform 0.2s;
-      cursor: pointer;
-    }
-
-    .dock-icon:hover {
-      transform: scale(1.15);
-    }
-
-    .indicator {
-      width: 6px;
-      height: 6px;
-      background: white;
-      border-radius: 50%;
-      margin-top: 4px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .dock-item[data-active="true"] .indicator {
-      opacity: 1;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      padding: 50px;
     }
   </style>
 </head>
 <body>
-
-  <div class="window" id="myWindow">
-    <div class="title-bar" id="titleBar">
-      <div class="buttons">
-        <div class="btn close"></div>
-        <div class="btn minimize"></div>
-        <div class="btn maximize"></div>
-      </div>
-    </div>
-    <div class="content">
-      <h2>나만의 Mac 창 🪟</h2>
-      <p>이 창이 떠 있으면 Finder도 활성화! 하얀 점 콕~</p>
-    </div>
-  </div>
-
-  <div class="dock">
-    <!-- Finder 아이콘 -->
-    <div class="dock-item" data-active="true">
-      <img src="icon/finder.png" alt="Finder" class="dock-icon">
-      <div class="indicator"></div>
-    </div>
-
-    <!-- Safari 아이콘 -->
-    <div class="dock-item" data-active="false">
-      <img src="icon/safari.png" alt="Safari" class="dock-icon">
-      <div class="indicator"></div>
-    </div>
-
-    <!-- 수정된 Messenges 아이콘 -->
-    <div class="dock-item" data-active="false">
-      <img src="icon/messenges.png" alt="Messenges" class="dock-icon">
-      <div class="indicator"></div>
-    </div>
-
-    <!-- Mail 아이콘 -->
-    <div class="dock-item" data-active="false">
-      <img src="icon/mail.png" alt="Mail" class="dock-icon">
-      <div class="indicator"></div>
-    </div>
-
-    <!-- 수정된 Calendar 아이콘 -->
-    <div class="dock-item" data-active="false">
-      <img src="icon/calendarjul17.png" alt="Calendar" class="dock-icon">
-      <div class="indicator"></div>
-    </div>
-
-    <!-- Notes 아이콘 -->
-    <div class="dock-item" data-active="false">
-      <img src="icon/notes.png" alt="Notes" class="dock-icon">
-      <div class="indicator"></div>
-    </div>
-
-  </div>
-
-  <script>
-    const windowEl = document.getElementById("myWindow");
-    const titleBar = document.getElementById("titleBar");
-
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-
-    titleBar.addEventListener("mousedown", (e) => {
-      isDragging = true;
-      offsetX = e.clientX - windowEl.offsetLeft;
-      offsetY = e.clientY - windowEl.offsetTop;
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        windowEl.style.left = `${e.clientX - offsetX}px`;
-        windowEl.style.top = `${e.clientY - offsetY}px`;
-      }
-    });
-
-    document.addEventListener("mouseup", () => {
-      isDragging = false;
-    });
-  </script>
-
+  <h1>안녕하세요!</h1>
+  <p>이건 내 첫 번째 웹페이지예요.</p>
 </body>
 </html>
