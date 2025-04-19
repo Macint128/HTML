@@ -1,111 +1,48 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>visionOS 3D 카드</title>
+  <meta charset="UTF-8">
+  <title>퉁퉁퉁 사후르</title>
   <style>
     body {
       margin: 0;
-      background: radial-gradient(circle at center, #d0d0e0, #a0a0c0);
+      background: linear-gradient(#ffd6ff, #c8b6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
+      perspective: 1000px;
+      font-family: 'Arial', sans-serif;
     }
 
-    .glass-card {
-      width: 320px;
-      height: 420px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      border-radius: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-      transition: transform 0.5s ease;
+    .card {
+      width: 300px;
+      height: 300px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      color: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      align-items: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #5a189a;
       transform-style: preserve-3d;
+      animation: bounce 1s infinite ease-in-out;
+      transform: rotateX(20deg) rotateY(15deg);
     }
 
-    video {
-      display: none;
-    }
-
-    canvas {
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: 0;
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0) rotateX(20deg) rotateY(15deg);
+      }
+      50% {
+        transform: translateY(-20px) rotateX(25deg) rotateY(10deg);
+      }
     }
   </style>
 </head>
 <body>
-  <video id="input_video" autoplay></video>
-  <canvas class="output_canvas" width="640" height="480"></canvas>
-  <div class="glass-card" id="card">
-    <h2>visionOS 카드</h2>
-    <p>손을 흔들면 반응합니다! 👋</p>
-  </div>
-
-  <script type="module">
-    import { Hands } from 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
-    import { Camera } from 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
-    import { drawConnectors, drawLandmarks } from 'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js';
-
-    const videoElement = document.getElementById('input_video');
-    const canvasElement = document.querySelector('.output_canvas');
-    const canvasCtx = canvasElement.getContext('2d');
-    const card = document.getElementById('card');
-
-    const hands = new Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
-
-    hands.setOptions({
-      maxNumHands: 1,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.7,
-      minTrackingConfidence: 0.5
-    });
-
-    hands.onResults(results => {
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-      if (results.multiHandLandmarks.length > 0) {
-        const landmarks = results.multiHandLandmarks[0];
-
-        // 간단한 제스처 판별: 손의 중간 좌표로 카드 회전
-        const indexFinger = landmarks[8];
-        const x = indexFinger.x - 0.5;
-        const y = indexFinger.y - 0.5;
-
-        card.style.transform = `rotateY(${x * 100}deg) rotateX(${y * -100}deg)`;
-
-        drawConnectors(canvasCtx, landmarks, Hands.HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
-        drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 2 });
-      }
-
-      canvasCtx.restore();
-    });
-
-    const camera = new Camera(videoElement, {
-      onFrame: async () => {
-        await hands.send({ image: videoElement });
-      },
-      width: 640,
-      height: 480
-    });
-
-    camera.start();
-  </script>
+  <div class="card">퉁퉁퉁<br>사후르</div>
 </body>
 </html>
