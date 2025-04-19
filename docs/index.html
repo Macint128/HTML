@@ -1,92 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>동굴 탐험</title>
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-    }
-
-    .scene {
-      width: 100vw;
-      height: 100vh;
-      perspective: 1000px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .layer {
-      position: absolute;
-      width: 120%;
-      height: 120%;
-      top: -10%;
-      left: -10%;
-      background-position: center;
-      background-size: cover;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease-out;
-    }
-
-    .layer.bg {
-      background-image: url('https://images.unsplash.com/photo-1563298723-dcfebaa392e3'); /* 동굴 배경 */
-      z-index: 1;
-      transform: translateZ(-300px) scale(1.3);
-    }
-
-    .layer.mid {
-      background-image: url('https://images.unsplash.com/photo-1516912481808-3406841bd33c'); /* 중간 깊이 */
-      z-index: 2;
-      transform: translateZ(-150px) scale(1.2);
-    }
-
-    .layer.front {
-      background-image: url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308'); /* 앞쪽 */
-      z-index: 3;
-      transform: translateZ(0px) scale(1);
-    }
-
-    .title {
-      position: absolute;
-      color: white;
-      font-size: 3rem;
-      z-index: 4;
-      width: 100%;
-      text-align: center;
-      top: 40%;
-      font-family: 'Trebuchet MS', sans-serif;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js 핸드 트래킹 데모</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 10;
+        }
+        #videoElement {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            width: 160px;
+            height: 120px;
+            border-radius: 5px;
+            border: 2px solid white;
+            z-index: 10;
+            opacity: 0.7;
+            transform: scaleX(-1);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 </head>
 <body>
-  <div class="scene">
-    <div class="layer bg"></div>
-    <div class="layer mid"></div>
-    <div class="layer front"></div>
-    <div class="title">동굴 속으로...</div>
-  </div>
+    <div id="info">손을 카메라 앞에 보여주세요</div>
+    <video id="videoElement" playsinline></video>
 
-  <script>
-    window.addEventListener('deviceorientation', (e) => {
-      const x = e.gamma; // 좌우 기울기
-      const y = e.beta;  // 앞뒤 기울기
-
-      document.querySelectorAll('.layer').forEach((layer, i) => {
-        const depth = (i + 1) * 15;
-        const moveX = x * depth;
-        const moveY = y * depth;
-
-        layer.style.transform = `
-          translateX(${moveX}px)
-          translateY(${moveY}px)
-          translateZ(${-(3 - i) * 150}px)
-          scale(${1 + (i * 0.1)})
-        `;
-      });
-    });
-  </script>
+    <script>
+        // 1. Three.js - 3D 씬 설정
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        // 조명 설정
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+        
+        // 2. Three.js에서 카드 만들기 (PlaneGeometry)
+        const cardGeometry = new THREE.PlaneGeometry(2, 1.2);
+        const cardMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x156289,
+            metalness: 0.2,
+            roughness: 0.1,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide,
+            transmission: 0.5
+        });
+        const card = new THREE.Mesh(cardGeometry, cardMaterial);
+        scene.add(card);
+        
+        // 카메라 위치 설정
+        camera.position.z = 5;
+        
+        // 3. 카메라 설정 및 핸드 트래킹
+        const videoElement = document.getElementById('videoElement');
+        const infoElement = document.getElementById('info');
+        
+        // Mediapipe Hands 설정
+        const hands = new Hands({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }
+        });
+        
+        hands.setOptions({
+            maxNumHands: 1,                // 최대 손 인식 개수
+            modelComplexity: 1,            // 모델 복잡도 (0-1)
+            minDetectionConfidence: 0.5,   // 최소 감지 신뢰도
+            minTrackingConfidence: 0.5     // 최소 추적 신뢰도
+        });
+        
+        hands.onResults((results) => {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                infoElement.textContent = "손 인식됨!";
+                
+                // 검지 손가락 끝 위치 (21개 랜드마크 중 8번 인덱스)
+                const indexFinger = results.multiHandLandmarks[0][8];
+                
+                // 손 위치를 Three.js 좌표로 변환
+                // x, y 좌표는 0~1 범위로 제공되므로 -3~3 범위로 변환
+                card.position.x = (indexFinger.x - 0.5) * 6;
+                card.position.y = -(indexFinger.y - 0.5) * 6; // y축은 반전시킴
+                
+                // 손의 깊이 정보로 z축 조정 (0.5를 기준으로 더 가까워지면 앞으로)
+                card.position.z = (indexFinger.z - 0.5) * 3; 
+            } else {
+                infoElement.textContent = "손을 카메라 앞에 보여주세요";
+            }
+        });
+        
+        // 4. 카메라 영상 처리 및 출력
+        const camera_utils = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        
+        // 카메라 시작
+        camera_utils.start()
+            .then(() => console.log("카메라가 시작되었습니다."))
+            .catch(error => {
+                console.error("카메라 오류:", error);
+                infoElement.textContent = "카메라 권한을 허용해주세요!";
+            });
+        
+        // 5. 애니메이션 및 렌더링
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 카드 자동 회전 효과
+            card.rotation.y += 0.003;
+            
+            // 씬과 카메라를 렌더링
+            renderer.render(scene, camera);
+        }
+        
+        // 애니메이션 시작
+        animate();
+        
+        // 6. 윈도우 리사이즈 대응
+        window.addEventListener('resize', () => {
+            // 카메라 aspect ratio 업데이트
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            
+            // 렌더러 크기 업데이트
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
