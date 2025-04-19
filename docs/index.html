@@ -2,19 +2,68 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>내 첫 번째 웹페이지</title>
+  <title>3D 카드 예제</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card-container {
+      perspective: 1000px;
+    }
+
+    .card {
+      width: 300px;
+      height: 400px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transition: transform 0.4s ease;
+      transform-style: preserve-3d;
+    }
+
+    .card:hover {
+      transform: rotateY(15deg) rotateX(10deg) scale(1.03);
+    }
+
+    .card-content {
+      padding: 30px;
       text-align: center;
-      padding: 50px;
+      transform: translateZ(50px); /* 3D 느낌! */
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    .card p {
+      color: #555;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transform: translateZ(20px);
     }
   </style>
 </head>
 <body>
-  <h1>안녕하세요!</h1>
-  <p>이건 내 첫 번째 웹페이지예요.</p>
+  <div class="card-container">
+    <div class="card">
+      <div class="card-content">
+        <img src="https://source.unsplash.com/300x200/?nature,water" alt="예쁜 이미지">
+        <h2>3D 카드✨</h2>
+        <p>이 카드는 마우스를 가져다대면<br>입체적으로 튀어나와요! 🃏</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
