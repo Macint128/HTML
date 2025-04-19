@@ -2,47 +2,50 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>퉁퉁퉁 사후르</title>
+  <title>갈색 원통</title>
   <style>
     body {
       margin: 0;
-      background: linear-gradient(#ffd6ff, #c8b6ff);
+      background: #f0e7db;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       perspective: 1000px;
-      font-family: 'Arial', sans-serif;
     }
 
-    .card {
-      width: 300px;
-      height: 300px;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #5a189a;
+    .cylinder {
+      width: 100px;
+      height: 200px;
+      background: linear-gradient(to right, #5c3a21, #a0522d, #5c3a21);
+      border-radius: 50% / 10%;
+      position: relative;
       transform-style: preserve-3d;
-      animation: bounce 1s infinite ease-in-out;
-      transform: rotateX(20deg) rotateY(15deg);
+      transform: rotateX(15deg) rotateY(30deg);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
     }
 
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0) rotateX(20deg) rotateY(15deg);
-      }
-      50% {
-        transform: translateY(-20px) rotateX(25deg) rotateY(10deg);
-      }
+    .cylinder::before,
+    .cylinder::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 30px;
+      background: #5c3a21;
+      border-radius: 50%;
+      left: 0;
+    }
+
+    .cylinder::before {
+      top: -15px;
+    }
+
+    .cylinder::after {
+      bottom: -15px;
     }
   </style>
 </head>
 <body>
-  <div class="card">퉁퉁퉁<br>사후르</div>
+  <div class="cylinder"></div>
 </body>
 </html>
