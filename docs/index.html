@@ -2,44 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>튀어나오는 공</title>
+  <title>동굴 탐험</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #111;
-      perspective: 800px;
+      height: 100%;
       overflow: hidden;
+      background: #000;
     }
 
-    .ball {
-      width: 100px;
-      height: 100px;
-      background: radial-gradient(circle at 30% 30%, #ff3, #c90);
-      border-radius: 50%;
-      transform: translateZ(-600px) scale(1);
-      transition: transform 1s ease, box-shadow 1s ease;
+    .scene {
+      width: 100vw;
+      height: 100vh;
+      perspective: 1000px;
+      overflow: hidden;
+      position: relative;
     }
 
-    .ball.pop {
-      transform: translateZ(800px) scale(2.5);
-      box-shadow: 0 0 100px yellow;
+    .layer {
+      position: absolute;
+      width: 120%;
+      height: 120%;
+      top: -10%;
+      left: -10%;
+      background-position: center;
+      background-size: cover;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    .layer.bg {
+      background-image: url('https://images.unsplash.com/photo-1563298723-dcfebaa392e3'); /* 동굴 배경 */
+      z-index: 1;
+      transform: translateZ(-300px) scale(1.3);
+    }
+
+    .layer.mid {
+      background-image: url('https://images.unsplash.com/photo-1516912481808-3406841bd33c'); /* 중간 깊이 */
+      z-index: 2;
+      transform: translateZ(-150px) scale(1.2);
+    }
+
+    .layer.front {
+      background-image: url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308'); /* 앞쪽 */
+      z-index: 3;
+      transform: translateZ(0px) scale(1);
+    }
+
+    .title {
+      position: absolute;
+      color: white;
+      font-size: 3rem;
+      z-index: 4;
+      width: 100%;
+      text-align: center;
+      top: 40%;
+      font-family: 'Trebuchet MS', sans-serif;
     }
   </style>
 </head>
 <body>
-  <div class="ball" id="ball"></div>
+  <div class="scene">
+    <div class="layer bg"></div>
+    <div class="layer mid"></div>
+    <div class="layer front"></div>
+    <div class="title">동굴 속으로...</div>
+  </div>
 
   <script>
-    const ball = document.getElementById('ball');
+    window.addEventListener('deviceorientation', (e) => {
+      const x = e.gamma; // 좌우 기울기
+      const y = e.beta;  // 앞뒤 기울기
 
-    // 1초 후 튀어나오는 효과!
-    setTimeout(() => {
-      ball.classList.add('pop');
-    }, 1000);
+      document.querySelectorAll('.layer').forEach((layer, i) => {
+        const depth = (i + 1) * 15;
+        const moveX = x * depth;
+        const moveY = y * depth;
+
+        layer.style.transform = `
+          translateX(${moveX}px)
+          translateY(${moveY}px)
+          translateZ(${-(3 - i) * 150}px)
+          scale(${1 + (i * 0.1)})
+        `;
+      });
+    });
   </script>
 </body>
 </html>
