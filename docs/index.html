@@ -1,51 +1,45 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>갈색 원통</title>
+  <title>튀어나오는 공</title>
   <style>
     body {
       margin: 0;
-      background: #f0e7db;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      perspective: 1000px;
+      background-color: #111;
+      perspective: 800px;
+      overflow: hidden;
     }
 
-    .cylinder {
+    .ball {
       width: 100px;
-      height: 200px;
-      background: linear-gradient(to right, #5c3a21, #a0522d, #5c3a21);
-      border-radius: 50% / 10%;
-      position: relative;
-      transform-style: preserve-3d;
-      transform: rotateX(15deg) rotateY(30deg);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-    }
-
-    .cylinder::before,
-    .cylinder::after {
-      content: '';
-      position: absolute;
-      width: 100px;
-      height: 30px;
-      background: #5c3a21;
+      height: 100px;
+      background: radial-gradient(circle at 30% 30%, #ff3, #c90);
       border-radius: 50%;
-      left: 0;
+      transform: translateZ(-600px) scale(1);
+      transition: transform 1s ease, box-shadow 1s ease;
     }
 
-    .cylinder::before {
-      top: -15px;
-    }
-
-    .cylinder::after {
-      bottom: -15px;
+    .ball.pop {
+      transform: translateZ(800px) scale(2.5);
+      box-shadow: 0 0 100px yellow;
     }
   </style>
 </head>
 <body>
-  <div class="cylinder"></div>
+  <div class="ball" id="ball"></div>
+
+  <script>
+    const ball = document.getElementById('ball');
+
+    // 1초 후 튀어나오는 효과!
+    setTimeout(() => {
+      ball.classList.add('pop');
+    }, 1000);
+  </script>
 </body>
 </html>
