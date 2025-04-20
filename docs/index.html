@@ -1,165 +1,221 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js 핸드 트래킹 데모</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-        }
-        canvas {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 10;
-        }
-        #videoElement {
-            position: absolute;
-            right: 10px;
-            bottom: 10px;
-            width: 160px;
-            height: 120px;
-            border-radius: 5px;
-            border: 2px solid white;
-            z-index: 10;
-            opacity: 0.7;
-            transform: scaleX(-1);
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>iMachine: Espresso</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'SF Pro Display', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #111;
+    }
+
+    header {
+      background: black;
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 3em;
+      margin: 0;
+    }
+
+    header p {
+      font-size: 1.5em;
+      margin-top: 10px;
+    }
+
+    section {
+      padding: 60px 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .feature {
+      margin-bottom: 40px;
+    }
+
+    .highlight {
+      background: #eee;
+      padding: 15px;
+      border-left: 4px solid #999;
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      background: #222;
+      color: white;
+    }
+
+    .button {
+      background: black;
+      color: white;
+      padding: 15px 30px;
+      text-decoration: none;
+      border-radius: 30px;
+      font-weight: bold;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    /* iMachine CSS 이미지 */
+    .machine-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 60px;
+    }
+
+    .machine-body {
+      position: relative;
+      width: 200px;
+      height: 300px;
+      background: linear-gradient(145deg, #e3e3e3, #cfcfcf);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding-top: 20px;
+    }
+
+    .face-id {
+      width: 20px;
+      height: 20px;
+      background: #444;
+      border-radius: 50%;
+      margin: 0 auto;
+    }
+
+    .touch-bar {
+      width: 160px;
+      height: 12px;
+      background: #222;
+      border-radius: 8px;
+      margin: 15px auto;
+    }
+
+    .coffee-slot {
+      width: 140px;
+      height: 60px;
+      background: #666;
+      border-radius: 10px;
+      margin: 30px auto 10px auto;
+      position: relative;
+    }
+
+    .cup {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 0 0 30px 30px;
+      margin: 10px auto 0 auto;
+      border: 4px solid #ccc;
+      position: relative;
+      z-index: 2;
+    }
+
+    .steam {
+      width: 6px;
+      height: 40px;
+      background: linear-gradient(white, transparent);
+      position: absolute;
+      top: 210px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: steam-up 2s infinite ease-in-out;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    @keyframes steam-up {
+      0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateX(-50%) translateY(-30px);
+        opacity: 0;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="info">손을 카메라 앞에 보여주세요</div>
-    <video id="videoElement" playsinline></video>
 
-    <script>
-        // 1. Three.js - 3D 씬 설정
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-        
-        // 조명 설정
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 5, 5);
-        scene.add(directionalLight);
-        
-        // 2. Three.js에서 카드 만들기 (PlaneGeometry)
-        const cardGeometry = new THREE.PlaneGeometry(2, 1.2);
-        const cardMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x156289,
-            metalness: 0.2,
-            roughness: 0.1,
-            transparent: true,
-            opacity: 0.8,
-            side: THREE.DoubleSide,
-            transmission: 0.5
-        });
-        const card = new THREE.Mesh(cardGeometry, cardMaterial);
-        scene.add(card);
-        
-        // 카메라 위치 설정
-        camera.position.z = 5;
-        
-        // 3. 카메라 설정 및 핸드 트래킹
-        const videoElement = document.getElementById('videoElement');
-        const infoElement = document.getElementById('info');
-        
-        // Mediapipe Hands 설정
-        const hands = new Hands({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            }
-        });
-        
-        hands.setOptions({
-            maxNumHands: 1,                // 최대 손 인식 개수
-            modelComplexity: 1,            // 모델 복잡도 (0-1)
-            minDetectionConfidence: 0.5,   // 최소 감지 신뢰도
-            minTrackingConfidence: 0.5     // 최소 추적 신뢰도
-        });
-        
-        hands.onResults((results) => {
-            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                infoElement.textContent = "손 인식됨!";
-                
-                // 검지 손가락 끝 위치 (21개 랜드마크 중 8번 인덱스)
-                const indexFinger = results.multiHandLandmarks[0][8];
-                
-                // 손 위치를 Three.js 좌표로 변환
-                // x, y 좌표는 0~1 범위로 제공되므로 -3~3 범위로 변환
-                card.position.x = (indexFinger.x - 0.5) * 6;
-                card.position.y = -(indexFinger.y - 0.5) * 6; // y축은 반전시킴
-                
-                // 손의 깊이 정보로 z축 조정 (0.5를 기준으로 더 가까워지면 앞으로)
-                card.position.z = (indexFinger.z - 0.5) * 3; 
-            } else {
-                infoElement.textContent = "손을 카메라 앞에 보여주세요";
-            }
-        });
-        
-        // 4. 카메라 영상 처리 및 출력
-        const camera_utils = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({image: videoElement});
-            },
-            width: 640,
-            height: 480
-        });
-        
-        // 카메라 시작
-        camera_utils.start()
-            .then(() => console.log("카메라가 시작되었습니다."))
-            .catch(error => {
-                console.error("카메라 오류:", error);
-                infoElement.textContent = "카메라 권한을 허용해주세요!";
-            });
-        
-        // 5. 애니메이션 및 렌더링
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // 카드 자동 회전 효과
-            card.rotation.y += 0.003;
-            
-            // 씬과 카메라를 렌더링
-            renderer.render(scene, camera);
-        }
-        
-        // 애니메이션 시작
-        animate();
-        
-        // 6. 윈도우 리사이즈 대응
-        window.addEventListener('resize', () => {
-            // 카메라 aspect ratio 업데이트
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            
-            // 렌더러 크기 업데이트
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+<header>
+  <h1>iMachine: Espresso</h1>
+  <p>깨어있을 이유. 이제는 하나 더.</p>
+</header>
+
+<section>
+  <div class="feature">
+    <h2>한 번의 탭, 완벽한 샷.</h2>
+    <p>Apple Silicon M3 Caffeine Chip으로 전례 없는 커피 추출 속도와 품질을 경험하세요. Touch Bar 2.0으로 커피의 모든 디테일을 제어하고, Face ID Brew로 개인 맞춤 레시피를 자동으로 적용합니다.</p>
+  </div>
+
+  <div class="feature">
+    <h2>Siri, 한 잔 내려줘.</h2>
+    <p>"Hey Siri, 아메리카노 더 진하게." 말 한 마디로 완벽한 커피가 완성됩니다.</p>
+  </div>
+
+  <div class="feature">
+    <h2>완벽한 애플 생태계 통합</h2>
+    <p>iPhone, Mac, Apple Watch와 연결되어 언제 어디서든 추출을 시작하고, 알림까지 받으세요.</p>
+  </div>
+
+  <div class="feature">
+    <h2>Introducing: AirCaps</h2>
+    <p>40ml부터 150ml까지 다양한 용량, 그리고 7가지 독점 블렌드로 제공되는 AirCaps. 당신만의 커피를 만나보세요.</p>
+    <ul>
+      <li><strong>Mini (40ml)</strong> – 빠른 각성</li>
+      <li><strong>Classic (80ml)</strong> – 일상에 어울리는 밸런스</li>
+      <li><strong>Grande (150ml)</strong> – 여유로운 한 잔</li>
+    </ul>
+    <div class="highlight">
+      Cupertino Sunrise, Midnight XDR, Sierra Breeze, Macchiato Mist, Apple Park Roast, A13 Wake-Up, M3 Decaf Flow
+    </div>
+  </div>
+
+  <div class="feature">
+    <h2>AirCaps Smart Rack™</h2>
+    <p>MagSafe 고정, 자동 인식, 온습도 유지까지 가능한 프리미엄 보관 솔루션.</p>
+  </div>
+
+  <div class="feature">
+    <h2>가격 및 출시일</h2>
+    <p>
+      iMachine: Espresso – $499<br/>
+      iMachine: Espresso Pro – $699<br/>
+      (AirCaps Smart Rack 별도 판매)<br/>
+      <strong>출시일: 2025년 10월 9일</strong>
+    </p>
+    <a class="button" href="#">지금 주문하기</a>
+  </div>
+</section>
+
+<!-- CSS로 만든 가상 머신 이미지 -->
+<div class="machine-container">
+  <div class="machine-body">
+    <div class="face-id"></div>
+    <div class="touch-bar"></div>
+    <div class="coffee-slot"></div>
+    <div class="cup"></div>
+    <div class="steam"></div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 Apple Inc. (아님)<br/>이건 상상력에 의해 생성된 페이지입니다. 실제로 주문하시면... 커피는 안 나옵니다.</p>
+</footer>
+
 </body>
 </html>
