@@ -13,6 +13,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      user-select: none;
     }
     h1 {
       margin: 20px;
@@ -46,34 +47,42 @@
 
   <script>
     const grid = document.getElementById('popit-grid');
-
-    // 버블 6x5 = 30개 생성
     const rows = 5;
     const cols = 6;
 
+    const sound = new Audio("data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA..."); // 짧은 base64 팝 소리 (실제 전체 소리는 아래에 설명)
+
+    // 팝 효과 + 사운드
+    function popBubble(bubble) {
+      if (!bubble.classList.contains('popped')) {
+        bubble.classList.add('popped');
+        sound.currentTime = 0;
+        sound.play();
+        setTimeout(() => bubble.classList.remove('popped'), 200);
+      }
+    }
+
+    // 그리드 생성
     for (let i = 0; i < rows * cols; i++) {
       const bubble = document.createElement('div');
       bubble.classList.add('bubble');
-
-      // 터치 이벤트
-      bubble.addEventListener('touchstart', e => {
-        e.preventDefault();
-        bubble.classList.add('popped');
-        playPop();
-      }, { passive: false });
-
-      bubble.addEventListener('touchend', e => {
-        bubble.classList.remove('popped');
-      });
-
       grid.appendChild(bubble);
     }
 
-    // 팝 소리 효과 (선택 사항, base64로 간단하게 넣을 수도 있음)
-    function playPop() {
-      const pop = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
-      pop.volume = 0.2;
-      pop.play();
+    const bubbles = document.querySelectorAll('.bubble');
+
+    // 터치 처리
+    grid.addEventListener('touchstart', handleTouch, { passive: false });
+    grid.addEventListener('touchmove', handleTouch, { passive: false });
+
+    function handleTouch(e) {
+      e.preventDefault();
+      for (let touch of e.touches) {
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (el && el.classList.contains('bubble')) {
+          popBubble(el);
+        }
+      }
     }
   </script>
 </body>
