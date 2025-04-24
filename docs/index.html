@@ -3,302 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>iMachine: Espresso</title>
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>Pop It Game 🎈</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'SF Pro Display', sans-serif;
       margin: 0;
       padding: 0;
-      background: linear-gradient(to bottom, #f5f7fa, #e4e7ed);
-      color: #111;
-      overflow-x: hidden;
-    }
-
-    header, section, .machine-container, footer {
-      animation: fadeInUp 1s ease forwards;
-      opacity: 0;
-    }
-
-    header {
-      animation-delay: 0.2s;
-    }
-    section {
-      animation-delay: 0.4s;
-    }
-    .machine-container {
-      animation-delay: 0.6s;
-    }
-    footer {
-      animation-delay: 0.8s;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        transform: translateY(40px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    header {
-      background: linear-gradient(to right, #000, #1a1a1a);
-      color: white;
-      padding: 100px 20px 80px;
-      text-align: center;
-    }
-
-    header h1 {
-      font-size: 3.5em;
-      margin: 0;
-    }
-
-    header p {
-      font-size: 1.6em;
-      margin-top: 15px;
-      color: #ccc;
-    }
-
-    section {
-      padding: 80px 20px;
-      max-width: 1000px;
-      margin: auto;
-      scroll-snap-align: start;
-    }
-
-    .feature {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 40px;
-      margin-bottom: 40px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-      transition: transform 0.2s ease;
-    }
-
-    .feature:hover {
-      transform: scale(1.01);
-    }
-
-    h2 {
-      font-size: 2.2em;
-      margin-bottom: 15px;
-      color: #222;
-    }
-
-    .highlight {
-      background: #f0f0f0;
-      padding: 15px;
-      border-left: 4px solid #999;
-      font-style: italic;
-      margin-top: 10px;
-      border-radius: 10px;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    li {
-      margin-bottom: 5px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 50px 20px;
-      background: #1a1a1a;
-      color: #aaa;
-    }
-
-    .button {
-      background: black;
-      color: white;
-      padding: 15px 30px;
-      text-decoration: none;
-      border-radius: 30px;
-      font-weight: bold;
-      margin-top: 20px;
-      display: inline-block;
-      transition: background 0.3s ease;
-    }
-
-    .button:hover {
-      background: #333;
-    }
-
-    .machine-container {
+      background: #fdf6f0;
+      font-family: 'Comic Sans MS', cursive;
       display: flex;
-      justify-content: center;
-      margin-top: 80px;
-      scroll-snap-align: start;
+      flex-direction: column;
+      align-items: center;
     }
-
-    .machine-body {
-      position: relative;
-      width: 220px;
-      height: 320px;
-      background: linear-gradient(135deg, #e5e5e5, #cfcfcf);
-      border-radius: 25px;
-      box-shadow: inset 0 0 10px #fff, 0 12px 40px rgba(0,0,0,0.15);
-      padding-top: 20px;
-      transition: transform 0.3s;
+    h1 {
+      margin: 20px;
+      color: #ff69b4;
     }
-
-    .machine-body:hover {
-      transform: translateY(-5px);
+    #popit-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 60px);
+      gap: 10px;
+      padding: 20px;
     }
-
-    .face-id {
-      width: 22px;
-      height: 22px;
-      background: #333;
+    .bubble {
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      margin: 0 auto;
-      box-shadow: inset 0 0 4px #000;
+      background-color: #ffccff;
+      box-shadow: inset 0 0 5px #aaa;
+      transition: transform 0.1s, background-color 0.2s;
+      touch-action: none;
     }
-
-    .touch-bar {
-      width: 160px;
-      height: 14px;
-      background: #111;
-      border-radius: 8px;
-      margin: 15px auto;
-    }
-
-    .coffee-slot {
-      width: 150px;
-      height: 60px;
-      background: #666;
-      border-radius: 10px;
-      margin: 30px auto 10px auto;
-      position: relative;
-      box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-    }
-
-    .cup {
-      width: 60px;
-      height: 60px;
-      background: white;
-      border-radius: 0 0 30px 30px;
-      margin: 10px auto 0 auto;
-      border: 4px solid #ccc;
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .steam {
-      position: absolute;
-      top: 180px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .steam svg {
-      width: 60px;
-      height: 60px;
-      opacity: 0.5;
-      animation: floatSmoke 4s ease-in-out infinite;
-    }
-
-    @keyframes floatSmoke {
-      0% {
-        transform: translate(-50%, 0) scale(1);
-        opacity: 0.6;
-      }
-      50% {
-        transform: translate(-50%, -20px) scale(1.05);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(-50%, -40px) scale(0.95);
-        opacity: 0;
-      }
-    }
-
-    html, body {
-      scroll-snap-type: y mandatory;
-      scroll-behavior: smooth;
+    .popped {
+      transform: scale(0.85);
+      background-color: #ff88cc;
+      box-shadow: inset 2px 2px 5px #555;
     }
   </style>
 </head>
 <body>
+  <h1>🫧 Pop It! 🫧</h1>
+  <div id="popit-grid"></div>
 
-<header>
-  <h1>iMachine: Espresso</h1>
-  <p>깨어있을 이유. 이제는 하나 더.</p>
-</header>
+  <script>
+    const grid = document.getElementById('popit-grid');
 
-<section>
-  <div class="feature">
-    <h2>한 번의 탭, 완벽한 샷.</h2>
-    <p>Apple Silicon M3 Caffeine Chip으로 전례 없는 커피 추출 속도와 품질을 경험하세요. Touch Bar 2.0으로 커피의 모든 디테일을 제어하고, Face ID Brew로 개인 맞춤 레시피를 자동으로 적용합니다.</p>
-  </div>
+    // 버블 6x5 = 30개 생성
+    const rows = 5;
+    const cols = 6;
 
-  <div class="feature">
-    <h2>Siri, 한 잔 내려줘.</h2>
-    <p>"Hey Siri, 아메리카노 더 진하게." 말 한 마디로 완벽한 커피가 완성됩니다.</p>
-  </div>
+    for (let i = 0; i < rows * cols; i++) {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
 
-  <div class="feature">
-    <h2>완벽한 애플 생태계 통합</h2>
-    <p>iPhone, Mac, Apple Watch와 연결되어 언제 어디서든 추출을 시작하고, 알림까지 받으세요.</p>
-  </div>
+      // 터치 이벤트
+      bubble.addEventListener('touchstart', e => {
+        e.preventDefault();
+        bubble.classList.add('popped');
+        playPop();
+      }, { passive: false });
 
-  <div class="feature">
-    <h2>Introducing: AirCaps</h2>
-    <p>40ml부터 150ml까지 다양한 용량, 그리고 7가지 독점 블렌드로 제공되는 AirCaps. 당신만의 커피를 만나보세요.</p>
-    <ul>
-      <li><strong>Mini (40ml)</strong> – 빠른 각성</li>
-      <li><strong>Classic (80ml)</strong> – 일상에 어울리는 밸런스</li>
-      <li><strong>Grande (150ml)</strong> – 여유로운 한 잔</li>
-    </ul>
-    <div class="highlight">
-      Cupertino Sunrise, Midnight XDR, Sierra Breeze, Macchiato Mist, Apple Park Roast, A13 Wake-Up, M3 Decaf Flow
-    </div>
-  </div>
+      bubble.addEventListener('touchend', e => {
+        bubble.classList.remove('popped');
+      });
 
-  <div class="feature">
-    <h2>AirCaps Smart Rack™</h2>
-    <p>MagSafe 고정, 자동 인식, 온습도 유지까지 가능한 프리미엄 보관 솔루션.</p>
-  </div>
+      grid.appendChild(bubble);
+    }
 
-  <div class="feature">
-    <h2>가격 및 출시일</h2>
-    <p>
-      iMachine: Espresso – $499<br/>
-      iMachine: Espresso Pro – $699<br/>
-      (AirCaps Smart Rack 별도 판매)<br/>
-      <strong>출시일: 2025년 10월 9일</strong>
-    </p>
-    <a class="button" href="#">지금 주문하기</a>
-  </div>
-</section>
-
-<div class="machine-container">
-  <div class="machine-body">
-    <div class="face-id"></div>
-    <div class="touch-bar"></div>
-    <div class="coffee-slot"></div>
-    <div class="cup"></div>
-    <div class="steam">
-      <svg viewBox="0 0 100 100">
-        <path d="M50,90 Q40,80 50,70 Q60,60 50,50 Q40,40 50,30" stroke="#aaa" stroke-width="4" fill="none" />
-      </svg>
-    </div>
-  </div>
-</div>
-
-<footer>
-  <p>© 2025 Apple Inc. (아님)<br/>이건 상상력에 의해 생성된 페이지입니다. 실제로 주문하시면... 커피는 안 나옵니다.</p>
-</footer>
-
+    // 팝 소리 효과 (선택 사항, base64로 간단하게 넣을 수도 있음)
+    function playPop() {
+      const pop = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+      pop.volume = 0.2;
+      pop.play();
+    }
+  </script>
 </body>
 </html>
