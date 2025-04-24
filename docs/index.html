@@ -50,7 +50,8 @@
     const rows = 5;
     const cols = 6;
 
-    const sound = new Audio("pop.mp3");
+    const sound = new Audio("pop.wav");
+    sound.load();
 
     function popBubble(bubble) {
       if (!bubble.classList.contains('popped')) {
