@@ -1,49 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko-kr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pop It Game 🎈</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>안녕</title>
 </head>
-<body>
-  <h1>🫧 Pop It! 🫧</h1>
-  <div id="popit-grid"></div>
-
-  <script>
-    const grid = document.getElementById('popit-grid');
-    const rows = 5;
-    const cols = 6;
-
-    const sound = new Audio("pop.wav");
-    sound.load();
-
-    function popBubble(bubble) {
-      if (!bubble.classList.contains('popped')) {
-        bubble.classList.add('popped');
-        sound.currentTime = 0;
-        sound.play();
-        setTimeout(() => bubble.classList.remove('popped'), 200);
-      }
-    }
-
-    for (let i = 0; i < rows * cols; i++) {
-      const bubble = document.createElement('div');
-      bubble.classList.add('bubble');
-      grid.appendChild(bubble);
-    }
-
-    grid.addEventListener('touchstart', handleTouch, { passive: false });
-    grid.addEventListener('touchmove', handleTouch, { passive: false });
-
-    function handleTouch(e) {
-      e.preventDefault();
-      for (let touch of e.touches) {
-        const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (el && el.classList.contains('bubble')) {
-          popBubble(el);
-        }
-      }
-    }
-  </script>
+<body> 
+  <h1>안녕</h1>
 </body>
-</html>
+<html>
