@@ -1,12 +1,117 @@
 <!DOCTYPE html>
-<html lang="ko-kr">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>안녕</title>
+  <meta charset="UTF-8" />
+  <title>모여봐요 HTML 숲 🏝️ (AI 본인 출격 ver.)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: url('https://images.unsplash.com/photo-1596854307942-373f8a7cc765?fit=crop&w=1920&q=80') no-repeat center center fixed;
+      background-size: cover;
+    }
+    video, canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    #video {
+      display: none; /* 숨김처리 (캔버스에 그리기만 사용) */
+    }
+    #canvas {
+      z-index: 2;
+    }
+    h1 {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 3em;
+      color: white;
+      text-shadow: 2px 2px 4px black;
+      z-index: 3;
+    }
+  </style>
 </head>
-<body> 
-  <h1>안녕</h1>
+<body>
+  <h1>모여봐요 HTML 숲 🦝 본인 출격!</h1>
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    async function setupCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+      video.srcObject = stream;
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          resolve(video);
+        };
+      });
+    }
+
+    async function main() {
+      await setupCamera();
+      video.play();
+
+      const net = await bodyPix.load({
+        architecture: 'MobileNetV1',
+        outputStride: 16,
+        multiplier: 0.75,
+        quantBytes: 2
+      });
+
+      async function segmentFrame() {
+        const segmentation = await net.segmentPerson(video, {
+          flipHorizontal: true,
+          internalResolution: 'medium',
+          segmentationThreshold: 0.7
+        });
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixelData = imageData.data;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < segmentation.data.length; i++) {
+          const [r, g, b, a] = [
+            frame.data[i * 4 + 0],
+            frame.data[i * 4 + 1],
+            frame.data[i * 4 + 2],
+            frame.data[i * 4 + 3]
+          ];
+
+          if (segmentation.data[i] === 0) {
+            // 배경 → 투명하게 처리
+            frame.data[i * 4 + 3] = 0;
+          } else {
+            // 사람 → 그대로 유지 (or 효과 줄 수도 있음)
+            frame.data[i * 4 + 0] = r;
+            frame.data[i * 4 + 1] = g;
+            frame.data[i * 4 + 2] = b;
+            frame.data[i * 4 + 3] = a;
+          }
+        }
+
+        ctx.putImageData(frame, 0, 0);
+        requestAnimationFrame(segmentFrame);
+      }
+
+      segmentFrame();
+    }
+
+    main();
+  </script>
 </body>
-<html>
+</html>
