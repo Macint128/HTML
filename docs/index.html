@@ -2,116 +2,137 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>모여봐요 HTML 숲 🏝️ (AI 본인 출격 ver.)</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>모여봐요 동물의 숲 클론</title>
   <style>
     body {
       margin: 0;
+      font-family: sans-serif;
+      background-color: #a8e6cf;
       overflow: hidden;
-      background: url('https://images.unsplash.com/photo-1596854307942-373f8a7cc765?fit=crop&w=1920&q=80') no-repeat center center fixed;
-      background-size: cover;
     }
-    video, canvas {
-      position: absolute;
-      top: 0; left: 0;
+
+    #game {
+      position: relative;
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      background: #dcedc1;
     }
-    #video {
-      display: none; /* 숨김처리 (캔버스에 그리기만 사용) */
-    }
-    #canvas {
-      z-index: 2;
-    }
-    h1 {
+
+    #character {
       position: absolute;
-      top: 20px;
-      width: 100%;
-      text-align: center;
-      font-size: 3em;
+      width: 40px;
+      height: 40px;
+      background-color: #ff8b94;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #tutorial {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.8);
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 10;
+    }
+
+    .controls {
+      display: none;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    .btn {
+      width: 60px;
+      height: 60px;
+      margin: 5px;
+      background-color: #ffaaa5;
+      border-radius: 50%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
       color: white;
-      text-shadow: 2px 2px 4px black;
-      z-index: 3;
+      touch-action: none;
     }
   </style>
 </head>
 <body>
-  <h1>모여봐요 HTML 숲 🦝 본인 출격!</h1>
-  <video id="video" autoplay muted playsinline></video>
-  <canvas id="canvas"></canvas>
+  <div id="game">
+    <div id="character"></div>
+    <div id="tutorial"></div>
+    <div class="controls" id="mobileControls">
+      <div>
+        <button class="btn" id="up">↑</button>
+      </div>
+      <div>
+        <button class="btn" id="left">←</button>
+        <button class="btn" id="down">↓</button>
+        <button class="btn" id="right">→</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const character = document.getElementById("character");
+    const tutorial = document.getElementById("tutorial");
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const speed = 10;
 
-    async function setupCamera() {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-      video.srcObject = stream;
-      return new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          resolve(video);
-        };
-      });
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+
+    function moveCharacter(dx, dy) {
+      x += dx;
+      y += dy;
+      x = Math.max(0, Math.min(window.innerWidth - 40, x));
+      y = Math.max(0, Math.min(window.innerHeight - 40, y));
+      character.style.left = x + "px";
+      character.style.top = y + "px";
     }
 
-    async function main() {
-      await setupCamera();
-      video.play();
+    if (isMobile) {
+      // 모바일 조작 버튼 보이기
+      document.getElementById("mobileControls").style.display = "block";
+      tutorial.innerText = "화면 아래의 버튼으로 움직일 수 있어요! 🍃";
 
-      const net = await bodyPix.load({
-        architecture: 'MobileNetV1',
-        outputStride: 16,
-        multiplier: 0.75,
-        quantBytes: 2
-      });
+      document.getElementById("up").addEventListener("touchstart", () => moveCharacter(0, -speed));
+      document.getElementById("down").addEventListener("touchstart", () => moveCharacter(0, speed));
+      document.getElementById("left").addEventListener("touchstart", () => moveCharacter(-speed, 0));
+      document.getElementById("right").addEventListener("touchstart", () => moveCharacter(speed, 0));
+    } else {
+      tutorial.innerText = "WASD 키로 캐릭터를 움직일 수 있어요! 🍃";
 
-      async function segmentFrame() {
-        const segmentation = await net.segmentPerson(video, {
-          flipHorizontal: true,
-          internalResolution: 'medium',
-          segmentationThreshold: 0.7
-        });
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixelData = imageData.data;
-
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-        for (let i = 0; i < segmentation.data.length; i++) {
-          const [r, g, b, a] = [
-            frame.data[i * 4 + 0],
-            frame.data[i * 4 + 1],
-            frame.data[i * 4 + 2],
-            frame.data[i * 4 + 3]
-          ];
-
-          if (segmentation.data[i] === 0) {
-            // 배경 → 투명하게 처리
-            frame.data[i * 4 + 3] = 0;
-          } else {
-            // 사람 → 그대로 유지 (or 효과 줄 수도 있음)
-            frame.data[i * 4 + 0] = r;
-            frame.data[i * 4 + 1] = g;
-            frame.data[i * 4 + 2] = b;
-            frame.data[i * 4 + 3] = a;
-          }
+      document.addEventListener("keydown", (e) => {
+        switch (e.key) {
+          case "w":
+          case "W":
+            moveCharacter(0, -speed);
+            break;
+          case "s":
+          case "S":
+            moveCharacter(0, speed);
+            break;
+          case "a":
+          case "A":
+            moveCharacter(-speed, 0);
+            break;
+          case "d":
+          case "D":
+            moveCharacter(speed, 0);
+            break;
         }
-
-        ctx.putImageData(frame, 0, 0);
-        requestAnimationFrame(segmentFrame);
-      }
-
-      segmentFrame();
+      });
     }
-
-    main();
   </script>
 </body>
 </html>
