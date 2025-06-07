@@ -1,207 +1,70 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>모여봐요 동물의 숲 클론</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #a8e6cf;
-      overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
     }
 
-    #game {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: linear-gradient(#dcedc1, #aed581);
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 415px;
+        height: 200px;
     }
 
-    #character {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background-color: #ff8b94;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
+    .caps {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
-    .villager {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background-color: #ffd3b6;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      z-index: 1;
+    .name {
+        text-align: center;
+        font-weight: bold;
+        color: black;
+        width: 50px;
+        height: 25px;
+        transform: rotate(-5deg);
+        border-radius: 25px;
+        background-color: rgb(200, 118, 11);
+        display: inline-block;
+        align-self: flex-start;
+        margin-left: 10px;
     }
 
-    #tutorial {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.8);
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 14px;
-      z-index: 10;
+    .cap {
+        width: 400px;
+        height: 55px;
+        border-radius: 27px;
+        background-color: antiquewhite;
     }
 
-    .controls {
-      display: none;
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
+    .cap-2 {
+        width: 350px;
+        height: 35px;
+        border-radius: 27px;
+        background-color: antiquewhite;
     }
 
-    .btn {
-      width: 60px;
-      height: 60px;
-      margin: 5px;
-      background-color: #ffaaa5;
-      border-radius: 50%;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 20px;
-      font-weight: bold;
-      color: white;
-      touch-action: none;
-    }
-
-    #dialog {
-      position: absolute;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,0.9);
-      padding: 15px;
-      border-radius: 10px;
-      display: none;
-      font-size: 16px;
-      z-index: 11;
-    }
   </style>
+  <title>동숲 말풍선</title>
 </head>
 <body>
-  <div id="game">
-    <div id="character"></div>
-    <div id="tutorial"></div>
-    <div id="dialog">🐻 안녕~ 만나서 반가워!</div>
-    <div class="controls" id="mobileControls">
-      <div>
-        <button class="btn" id="up">↑</button>
-      </div>
-      <div>
-        <button class="btn" id="left">←</button>
-        <button class="btn" id="down">↓</button>
-        <button class="btn" id="right">→</button>
-      </div>
-    </div>
+  <div class="container">
+    <div class="name">너굴</div>
+    <div class="caps"></div>
+      <div class="cap"></div>
+      <div class="cap-2"></div>
   </div>
-
-  <script>
-    const character = document.getElementById("character");
-    const tutorial = document.getElementById("tutorial");
-    const dialog = document.getElementById("dialog");
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const speed = 10;
-
-    let x = window.innerWidth / 2;
-    let y = window.innerHeight / 2;
-
-    // 주민 추가
-    const villagers = [];
-    const villagerEmojis = ["🐰", "🦊", "🦝", "🐻", "🐱", "🐥"];
-
-    function createVillager(emoji) {
-      const villager = document.createElement("div");
-      villager.className = "villager";
-      villager.innerText = emoji;
-      villager.style.left = Math.random() * (window.innerWidth - 40) + "px";
-      villager.style.top = Math.random() * (window.innerHeight - 40) + "px";
-      document.getElementById("game").appendChild(villager);
-      villagers.push(villager);
-    }
-
-    villagerEmojis.forEach(e => createVillager(e));
-
-    function moveCharacter(dx, dy) {
-      x += dx;
-      y += dy;
-      x = Math.max(0, Math.min(window.innerWidth - 40, x));
-      y = Math.max(0, Math.min(window.innerHeight - 40, y));
-      character.style.left = x + "px";
-      character.style.top = y + "px";
-
-      checkCollision();
-    }
-
-    function checkCollision() {
-      villagers.forEach(v => {
-        const vRect = v.getBoundingClientRect();
-        const cRect = character.getBoundingClientRect();
-
-        const overlap = !(
-          cRect.right < vRect.left ||
-          cRect.left > vRect.right ||
-          cRect.bottom < vRect.top ||
-          cRect.top > vRect.bottom
-        );
-
-        if (overlap) {
-          dialog.innerText = `${v.innerText} : 안녕! 🐾 반가워!`;
-          dialog.style.display = "block";
-        } else {
-          dialog.style.display = "none";
-        }
-      });
-    }
-
-    if (isMobile) {
-      // 모바일 튜토리얼 + 버튼 표시
-      document.getElementById("mobileControls").style.display = "block";
-      tutorial.innerText = "모바일 모드 📱\n화면 아래 버튼으로 움직여봐요!";
-
-      document.getElementById("up").addEventListener("touchstart", () => moveCharacter(0, -speed));
-      document.getElementById("down").addEventListener("touchstart", () => moveCharacter(0, speed));
-      document.getElementById("left").addEventListener("touchstart", () => moveCharacter(-speed, 0));
-      document.getElementById("right").addEventListener("touchstart", () => moveCharacter(speed, 0));
-    } else {
-      // PC 튜토리얼 + 키보드 입력
-      tutorial.innerText = "PC 모드 🖥️\nWASD 키로 캐릭터를 움직여봐요!";
-
-      document.addEventListener("keydown", (e) => {
-        switch (e.key) {
-          case "w":
-          case "W":
-            moveCharacter(0, -speed);
-            break;
-          case "s":
-          case "S":
-            moveCharacter(0, speed);
-            break;
-          case "a":
-          case "A":
-            moveCharacter(-speed, 0);
-            break;
-          case "d":
-          case "D":
-            moveCharacter(speed, 0);
-            break;
-        }
-      });
-    }
-  </script>
 </body>
 </html>
